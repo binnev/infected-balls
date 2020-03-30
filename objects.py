@@ -8,6 +8,8 @@ from conf import HEALTHY, INFECTED, RECOVERED, COLORS, DEFAULT_SPEED, INFECTION_
 
 
 class Ball:
+    _health = None
+
     def __init__(
         self,
         position=None,
@@ -15,10 +17,6 @@ class Ball:
         radius=0.1,
         mass=None,
         boundaries=None,
-        # top_boundary=None,
-        # bottom_boundary=None,
-        # left_boundary=None,
-        # right_boundary=None,
         health=HEALTHY,
         styles=None,
     ):
@@ -32,10 +30,6 @@ class Ball:
             styles = {"fill": True}
         self.styles = styles
         self.boundaries = boundaries
-        # self.top_boundary = top_boundary
-        # self.bottom_boundary = bottom_boundary
-        # self.left_boundary = left_boundary
-        # self.right_boundary = right_boundary
         self.artist = None
         self.health = health
 
@@ -152,23 +146,23 @@ class SensibleBall(Ball):
 
 
 class IrresponsibleBall(Ball):
+    size_increase = 4
+
+    # double in size when infected
     def update(self):
-        # double in size when infected
         if self._time_infected == 1:
-            self.radius *= 2
+            self.radius *= self.size_increase
 
         super().update()
 
-    # @property
-    # def health(self):
-    #     return Ball.health.getter(self)
-    #
-    # # todo: need to actually invoke the parent class setter method now.
-    # @health.setter
-    # def health(self, new_value):
-    #     if self.health == INFECTED and new_value == RECOVERED:
-    #         self.radius /= 2
-    #     Ball.health.setter(self, new_value)
+    # shrink again when recovered
+    @Ball.health.setter
+    def health(self, new_value):
+        # this works because Ball now has a default _health = None, so this setter isn't
+        # trying to access a nonexistent self._health property the first time it is called.
+        if self.health == INFECTED and new_value == RECOVERED:
+            self.radius /= self.size_increase
+        Ball.health.fset(self, new_value)  # fset is the parent class setter function
 
 
 class Canvas:
@@ -218,8 +212,10 @@ class Canvas:
         ball_class=None,
         ball_kwargs=None,
     ):
-        x_range = x_range if x_range else (self.boundaries["left"], self.boundaries["right"])
-        y_range = y_range if y_range else (self.boundaries["bottom"], self.boundaries["top"])
+        x_range = x_range if x_range else (self.boundaries["left"],
+                                           self.boundaries["right"])
+        y_range = y_range if y_range else (self.boundaries["bottom"],
+                                           self.boundaries["top"])
         ball_kwargs = ball_kwargs if ball_kwargs else dict()
         ball_class = ball_class if ball_class else Ball
         speed = DEFAULT_SPEED if speed is None else speed
