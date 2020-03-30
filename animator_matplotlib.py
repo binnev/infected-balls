@@ -57,7 +57,7 @@ patient_zero = Ball(position=(3, 3),
 canvas.add_balls(patient_zero)
 canvas.generate_random_balls(
     50,
-    # ball_class=IrresponsibleBall,
+    ball_class=IrresponsibleBall,
     # ball_class=SensibleBall,
     x_range=(UTRECHT["left"], UTRECHT["right"]),
     y_range=(UTRECHT["bottom"], UTRECHT["top"]),
@@ -121,5 +121,5 @@ def update(frame_number):
 
 
 animation = FuncAnimation(fig, update, interval=60, frames=range(300))
-# plt.show()
-animation.save("cities.mp4")
+plt.show()
+# animation.save("cities.mp4")
