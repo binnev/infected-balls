@@ -95,30 +95,13 @@ ax.axis("equal")
 ax.set_title(simulation_name)
 
 # initialise stacked area plot
-population_health = PopulationHealth()
-labels = [INFECTED, HEALTHY, RECOVERED]
-series = [population_health.data[label] for label in labels]
-colors = [COLORS[label] for label in labels]
-plt.sca(axes[1])
-sp = plt.stackplot(range(len(series[0])),
-                   *series,
-                   labels=labels,
-                   colors=colors)
-plt.legend(loc="upper left", fontsize="x-small")
-plt.title("population health")
-axes[1].axis("off")
-
+population_health = PopulationHealth(axes[1])
+sp = population_health.stackplot
 
 def update(frame_number):
     canvas.update()
     population_health.append(canvas.population_health_percentages)
-    series = [population_health.data[label] for label in labels]
-    plt.sca(axes[1])
-    plt.gca().collections.clear()
-    sp = plt.stackplot(range(len(series[0])),
-                       *series,
-                       labels=labels,
-                       colors=colors)
+    population_health.update()
 
 
 animation = FuncAnimation(fig, update, interval=60, frames=range(300))

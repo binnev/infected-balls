@@ -5,6 +5,7 @@ import numpy as np
 from matplotlib.patches import Circle
 
 from conf import HEALTHY, INFECTED, RECOVERED, COLORS, DEFAULT_SPEED, INFECTION_DURATION
+import matplotlib.pyplot as plt
 
 
 class Ball:
@@ -323,16 +324,35 @@ class Canvas:
 
 
 class PopulationHealth:
-    def __init__(self):
+    labels = [INFECTED, HEALTHY, RECOVERED]
+    colors = [COLORS[label] for label in labels]
+
+    def __init__(self, ax=None):
         self.data = {
             HEALTHY: [],
             INFECTED: [],
             RECOVERED: [],
         }
+        self.series = [self.data[label] for label in self.labels]
+        self.ax = ax if ax else plt.gca()
+        self.stackplot = self.create_stackplot()
+        self.ax.legend(loc="upper left", fontsize="x-small")
+        self.ax.set_title("population health")
+        self.ax.axis("off")
+
+    def create_stackplot(self):
+        return plt.stackplot(range(len(self.series[0])),
+                             *self.series,
+                             labels=self.labels,
+                             colors=self.colors)
 
     def append(self, new_data):
         for key, value in new_data.items():
             self.data[key].append(value)
+
+    def update(self):
+        self.ax.collections.clear()
+        self.stackplot = self.create_stackplot()
 
     @property
     def healthy(self):
