@@ -162,7 +162,8 @@ class IrresponsibleBall(Ball):
         # trying to access a nonexistent self._health property the first time it is called.
         if self.health == INFECTED and new_value == RECOVERED:
             self.radius /= self.size_increase
-        Ball.health.fset(self, new_value)  # fset is the parent class setter function
+        Ball.health.fset(self,
+                         new_value)  # fset is the parent class setter function
 
 
 class Canvas:
@@ -170,7 +171,6 @@ class Canvas:
         self,
         balls=None,
         boundaries=None,
-        styles=None,
     ):
         self.boundaries = boundaries
         self.balls = []
@@ -191,7 +191,7 @@ class Canvas:
         for ball in self.balls:
             ball.update()
 
-    def draw_balls(self, ax):
+    def add_balls_to_axis(self, ax):
         return [ball.draw(ax) for ball in self.balls]
 
     @classmethod
@@ -212,23 +212,25 @@ class Canvas:
         ball_class=None,
         ball_kwargs=None,
     ):
-        x_range = x_range if x_range else (self.boundaries["left"],
-                                           self.boundaries["right"])
-        y_range = y_range if y_range else (self.boundaries["bottom"],
-                                           self.boundaries["top"])
+        x_range = (x_range if x_range else
+                   (self.boundaries["left"], self.boundaries["right"]))
+        y_range = (y_range if y_range else
+                   (self.boundaries["bottom"], self.boundaries["top"]))
         ball_kwargs = ball_kwargs if ball_kwargs else dict()
         ball_class = ball_class if ball_class else Ball
         speed = DEFAULT_SPEED if speed is None else speed
-        angle = random() * 2 * np.pi
-        u = speed * np.cos(angle)
-        v = speed * np.sin(angle)
         x_width = x_range[1] - x_range[0]
         y_width = y_range[1] - y_range[0]
         for ii in range(n):
+            angle = random() * 2 * np.pi
+            u = speed * np.cos(angle)
+            v = speed * np.sin(angle)
             self.add_balls(
                 ball_class(
-                    position=(x_range[0] + random() * x_width,
-                              y_range[0] + random() * y_width),
+                    position=(
+                        x_range[0] + random() * x_width,
+                        y_range[0] + random() * y_width,
+                    ),
                     velocity=(u, v),
                     **ball_kwargs,
                 ))
@@ -310,8 +312,17 @@ class Canvas:
         }
         return output
 
+    def update(self):
+        """Use this in the animation update function. """
+        self.update_balls_position()
+        # handle_infections needs to come before handle_collisions, otherwise no infections
+        # ever occur because handle_collisions moves the balls such that theyre no longer
+        # touching.
+        self.handle_infections()
+        self.handle_collisions()
 
-class PopulationHealth():
+
+class PopulationHealth:
     def __init__(self):
         self.data = {
             HEALTHY: [],
