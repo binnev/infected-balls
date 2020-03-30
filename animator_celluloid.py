@@ -11,9 +11,9 @@ def main():
     y = [0, 10, 10, 0, 0]
     camera = Camera(fig)
     canvas = Canvas(boundaries=dict(left=0, bottom=0, right=10, top=10))
-    patient_zero = Ball(
-        position=(3, 3), velocity=(-0.1, -0.2), health="infected"
-    )
+    patient_zero = Ball(position=(3, 3),
+                        velocity=(-0.1, -0.2),
+                        health="infected")
     canvas.add_balls(patient_zero)
     canvas.generate_random_balls(25)
     artists = canvas.draw_balls(ax)
@@ -29,7 +29,7 @@ def main():
         plt.draw()
         camera.snap()
 
-    animation = camera.animate(interval=50,)
+    animation = camera.animate(interval=50, )
     animation.save("simple_ball.gif", writer="imagemagick")
     print("done!")
 
